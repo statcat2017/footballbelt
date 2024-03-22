@@ -113,6 +113,8 @@ for game in cup_entries:
     game[3] = game[3].replace("Preliminary Round ","")
     if "Att:" not in game:
         print(game)
+
+#small dset - sort out in google sheets
     
     
 
