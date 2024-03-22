@@ -15,14 +15,24 @@ spain = pd.read_csv('data/spain.csv')
 italy = pd.read_csv('data/italy.csv')
 turkey = pd.read_csv('data/turkey.csv')
 soviet1975 = pd.read_csv('data/soviet1975.csv')
+sovietcup1975 = pd.read_csv('data/sovietcup1975.csv')
+
 
 #convert engleague date to date format
 engleague['Date'] = pd.to_datetime(engleague['Date']).dt.date
+#add countrycode
+engleague['countrycode'] = 'EN'
+
+sovietcup1975['Date'] = pd.to_datetime(sovietcup1975['Date']).dt.date
+sovietcup1975['totgoal'] = sovietcup1975['hgoal'] + sovietcup1975['vgoal']
+sovietcup1975['goaldif'] = sovietcup1975['hgoal'] - sovietcup1975['vgoal']
+sovietcup1975['countrycode'] = 'SU'
 
 soviet1975['Date'] = pd.to_datetime(soviet1975['Date']).dt.date
 soviet1975['totgoal'] = soviet1975['hgoal'] + soviet1975['vgoal']
 soviet1975['goaldif'] = soviet1975['hgoal'] - soviet1975['vgoal']
 soviet1975['result'] = soviet1975.apply(lambda x: "H" if x['hgoal'] > x['vgoal'] else "A" if x['hgoal'] < x['vgoal'] else "D", axis=1)
+sovietcup1975['countrycode'] = 'SU'
 
 #convert spanish league date to date format
 spain['Date'] = pd.to_datetime(spain['Date']).dt.date
@@ -30,6 +40,7 @@ spain['Date'] = pd.to_datetime(spain['Date']).dt.date
 spain['totgoal'] = spain['hgoal'] + spain['vgoal']
 spain['goaldif'] = spain['hgoal'] - spain['vgoal']
 spain['result'] = spain.apply(lambda x: "H" if x['hgoal'] > x['vgoal'] else "A" if x['hgoal'] < x['vgoal'] else "D", axis=1)
+spain['countrycode'] = 'ES'
 
 #convert italian league date to date format
 italy['Date'] = pd.to_datetime(italy['Date']).dt.date
@@ -37,9 +48,11 @@ italy['Date'] = pd.to_datetime(italy['Date']).dt.date
 italy['totgoal'] = italy['hgoal'] + italy['vgoal']
 italy['goaldif'] = italy['hgoal'] - italy['vgoal']
 italy['result'] = italy.apply(lambda x: "H" if x['hgoal'] > x['vgoal'] else "A" if x['hgoal'] < x['vgoal'] else "D", axis=1)
+italy['countrycode'] = 'IT'
 
 #convert turkish league date to date format
 turkey['Date'] = pd.to_datetime(turkey['Date']).dt.date
+turkey['countrycode'] = 'TR'
 
 #convert german league date to date format
 germany['Date'] = pd.to_datetime(germany['Date']).dt.date
@@ -47,6 +60,7 @@ germany['Date'] = pd.to_datetime(germany['Date']).dt.date
 germany['totgoal'] = germany['hgoal'] + germany['vgoal']
 germany['goaldif'] = germany['hgoal'] - germany['vgoal']
 germany['result'] = germany.apply(lambda x: "H" if x['hgoal'] > x['vgoal'] else "A" if x['hgoal'] < x['vgoal'] else "D", axis=1)
+germany['countrycode'] = 'DE'
 
 #remove fa cup games with no date
 engfacup = engfacup[engfacup['Date'].notna()]
@@ -60,6 +74,7 @@ engfacup['tier'] = 0
 engfacup['totgoal'] = engfacup['hgoal'] + engfacup['vgoal']
 engfacup['goaldif'] = engfacup['hgoal'] - engfacup['vgoal']
 engfacup['result'] = engfacup.apply(lambda x: "H" if x['hgoal'] > x['vgoal'] else "A" if x['hgoal'] < x['vgoal'] else "D", axis=1)
+engfacup['countrycode'] = 'EN'
 
 #convert engleaguecup date to date format
 engleaguecup['Date'] = pd.to_datetime(engleaguecup['Date']).dt.date
@@ -71,6 +86,7 @@ engleaguecup['tier'] = 0
 engleaguecup['totgoal'] = engleaguecup['hgoal'] + engleaguecup['vgoal']
 engleaguecup['goaldif'] = engleaguecup['hgoal'] - engleaguecup['vgoal']
 engleaguecup['result'] = engleaguecup.apply(lambda x: "H" if x['hgoal'] > x['vgoal'] else "A" if x['hgoal'] < x['vgoal'] else "D", axis=1)
+engleaguecup['countrycode'] = 'EN'
 
 #convert champs date to date format
 champos['Date'] = pd.to_datetime(champos['Date']).dt.date
@@ -82,9 +98,14 @@ champos['tier'] = 0
 champos['totgoal'] = champos['hgoal'] + champos['vgoal']
 champos['goaldif'] = champos['hgoal'] - champos['vgoal']
 champos['result'] = champos.apply(lambda x: "H" if x['hgoal'] > x['vgoal'] else "A" if x['hgoal'] < x['vgoal'] else "D", axis=1)
+#name conversions
+#if the home team is called bayern munich, change to bayern munchen
+champos['home'] = champos['home'].replace('Bayern Munich','Bayern Munchen')
+champos['visitor'] = champos['visitor'].replace('Bayern Munich','Bayern Munchen')
+champos['countrycode'] = 'EU'
 
-#concatenate engleague and engfacup
-master = pd.concat([engleague,engfacup,engleaguecup,champos,germany,spain,italy,turkey,soviet1975],ignore_index=True)
+#concatenate
+master = pd.concat([engleague,engfacup,engleaguecup,champos,germany,spain,italy,turkey,soviet1975,sovietcup1975],ignore_index=True)
 
 #sort and reindex master by date
 master.sort_values('Date', inplace = True)
@@ -106,10 +127,10 @@ for index,match in master.iterrows():
         if defense(champion,match)[1] == 1:
             #handle end of reign
             current_reign.lost(match)
-            print(f"{current_reign.champion} lost the belt to {current_reign.lost_to} on {current_reign.end_date}.")
+            #print(f"{current_reign.champion} lost the belt to {current_reign.lost_to} on {current_reign.end_date}.")
             reigns.append(current_reign)
             champion = defense(champion,match)[0]
-            print(f"{current_reign.champion} held the belt for {(current_reign.end_date - current_reign.start_date).days} days and defended it {current_reign.defenses} times.\n")    
+            #print(f"{current_reign.champion} held the belt for {(current_reign.end_date - current_reign.start_date).days} days and defended it {current_reign.defenses} times.\n")    
             #update club stats
             if current_reign.champion in clubs:
                 clubs[current_reign.champion].add_reign(current_reign)

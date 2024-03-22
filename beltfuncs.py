@@ -12,10 +12,13 @@ class Reign:
         self.champion = result(match_won)[1]
         self.start_date = match_won['Date']
         self.won_from = result(match_won)[2]
+        self.won_in = match_won['countrycode']
         self.end_date = None
         self.lost_to = None
+        self.lost_in = None
         self.reign_duration = None
         self.defenses = 0
+
     
     def defended(self):
         self.defenses += 1
@@ -23,7 +26,11 @@ class Reign:
     def lost(self,match_lost):
         self.end_date = match_lost['Date']
         self.lost_to = result(match_lost)[1]
+        self.lost_in = match_lost['countrycode']
         self.reign_duration = (self.end_date - self.start_date).days
+        if self.lost_in != self.won_in:
+            print(f"Warning! Belt moved from {self.won_in} to {self.lost_in} on {self.end_date}.")
+            print(f'{self.champion} lost the belt to {self.lost_to}.')
 
 class Club:
     def __init__(self,champion):
