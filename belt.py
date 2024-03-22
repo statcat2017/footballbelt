@@ -14,9 +14,15 @@ germany = pd.read_csv('data/germany.csv')
 spain = pd.read_csv('data/spain.csv')
 italy = pd.read_csv('data/italy.csv')
 turkey = pd.read_csv('data/turkey.csv')
+soviet1975 = pd.read_csv('data/soviet1975.csv')
 
 #convert engleague date to date format
 engleague['Date'] = pd.to_datetime(engleague['Date']).dt.date
+
+soviet1975['Date'] = pd.to_datetime(soviet1975['Date']).dt.date
+soviet1975['totgoal'] = soviet1975['hgoal'] + soviet1975['vgoal']
+soviet1975['goaldif'] = soviet1975['hgoal'] - soviet1975['vgoal']
+soviet1975['result'] = soviet1975.apply(lambda x: "H" if x['hgoal'] > x['vgoal'] else "A" if x['hgoal'] < x['vgoal'] else "D", axis=1)
 
 #convert spanish league date to date format
 spain['Date'] = pd.to_datetime(spain['Date']).dt.date
@@ -78,7 +84,7 @@ champos['goaldif'] = champos['hgoal'] - champos['vgoal']
 champos['result'] = champos.apply(lambda x: "H" if x['hgoal'] > x['vgoal'] else "A" if x['hgoal'] < x['vgoal'] else "D", axis=1)
 
 #concatenate engleague and engfacup
-master = pd.concat([engleague,engfacup,engleaguecup,champos,germany,spain,italy,turkey],ignore_index=True)
+master = pd.concat([engleague,engfacup,engleaguecup,champos,germany,spain,italy,turkey,soviet1975],ignore_index=True)
 
 #sort and reindex master by date
 master.sort_values('Date', inplace = True)
